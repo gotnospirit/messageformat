@@ -56,16 +56,6 @@ func (x *Parser) Register(key string, p parseFunc, f formatFunc) error {
 	return nil
 }
 
-func (x *Parser) getParser(key string) (parseFunc, error) {
-	p, ok := x.parsers[key]
-	if !ok {
-		return nil, fmt.Errorf("UnknownType: `%s`", key)
-	} else if nil == p {
-		return nil, fmt.Errorf("UndefinedParseFunc: `%s`", key)
-	}
-	return p, nil
-}
-
 func (x *Parser) parseExpression(start, end int, ptr_input *[]rune) (string, Expression, int, error) {
 	varname, char, pos, err := readVar(start, end, ptr_input)
 	if nil != err {
@@ -81,9 +71,11 @@ func (x *Parser) parseExpression(start, end int, ptr_input *[]rune) (string, Exp
 		return "", nil, pos, err
 	}
 
-	fn, err := x.getParser(ctype)
-	if nil != err {
-		return "", nil, pos, err
+	fn, ok := x.parsers[ctype]
+	if !ok {
+		return "", nil, pos, fmt.Errorf("UnknownType: `%s`", ctype)
+	} else if nil == fn {
+		return "", nil, pos, fmt.Errorf("UndefinedParseFunc: `%s`", ctype)
 	}
 
 	expr, pos, err := fn(varname, x, char, pos, end, ptr_input)

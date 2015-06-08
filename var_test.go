@@ -1,3 +1,5 @@
+// @TODO(gotnospirit) add test on readVar
+
 package messageformat
 
 import (
@@ -67,5 +69,3 @@ func BenchmarkVar(b *testing.B) {
 		map[string]interface{}{"A": "benchmark"},
 	)
 }
-
-// @TODO(gotnospirit) add test on readVar

@@ -1,3 +1,5 @@
+// @TODO(gotnospirit) add test on parseExpression, parse, NewWithCulture
+
 package messageformat
 
 import (
@@ -338,40 +340,43 @@ func TestMultiline(t *testing.T) {
 }
 
 func TestRegister(t *testing.T) {
-	o, _ := New()
-
-	// checks default types can't be overloaded
-	err := o.Register("select", nil, nil)
-	doTestError(t, "ParserAlreadyRegistered", err)
-
-	err = o.Register("selectordinal", nil, nil)
-	doTestError(t, "ParserAlreadyRegistered", err)
-
-	err = o.Register("plural", nil, nil)
-	doTestError(t, "ParserAlreadyRegistered", err)
-
-	// nil parseFunc and/or formatFunc are accepted (even if parsing will leads to an error!)
-	err = o.Register("noparse", nil, nil)
+	o, err := New()
 	if nil != err {
-		t.Errorf("Unexpected error: %s", err.Error())
+		t.Errorf("Unexpected parse failure: `%s`", err.Error())
+	} else {
+		// checks default types can't be overloaded
+		err := o.Register("select", nil, nil)
+		doTestError(t, "ParserAlreadyRegistered", err)
+
+		err = o.Register("selectordinal", nil, nil)
+		doTestError(t, "ParserAlreadyRegistered", err)
+
+		err = o.Register("plural", nil, nil)
+		doTestError(t, "ParserAlreadyRegistered", err)
+
+		// nil parseFunc and/or formatFunc are accepted (even if parsing will leads to an error!)
+		err = o.Register("noparse", nil, nil)
+		if nil != err {
+			t.Errorf("Unexpected error: %s", err.Error())
+		}
+
+		// checks custom types can't be overloaded too
+		err = o.Register("noparse", nil, nil)
+		doTestError(t, "ParserAlreadyRegistered", err)
+
+		// checks that a nil parseFunc leads to an "UndefinedParseFunc" error while parsing
+		input := `{N,noparse}`
+		_, err = o.Parse(input)
+		doTestCompileError(t, input, "ParseError: `UndefinedParseFunc: `noparse`` at 10", err)
+
+		// checks that a nil formatFunc leads to an "UndefinedFormatFunc" error while formatting
+		o.Register("noeval", func(varname string, _ *Parser, _ rune, start int, _ int, _ *[]rune) (Expression, int, error) {
+			return varname, start, nil
+		}, nil)
+
+		input = `{N,noeval}`
+		mf, _ := o.Parse(input)
+		_, err = mf.Format()
+		doTestCompileError(t, input, "UndefinedFormatFunc: `noeval`", err)
 	}
-
-	// checks custom types can't be overloaded too
-	err = o.Register("noparse", nil, nil)
-	doTestError(t, "ParserAlreadyRegistered", err)
-
-	// checks that a nil parseFunc leads to an "UndefinedParseFunc" error while parsing
-	input := `{N,noparse}`
-	_, err = o.Parse(input)
-	doTestCompileError(t, input, "ParseError: `UndefinedParseFunc: `noparse`` at 10", err)
-
-	// checks that a nil formatFunc leads to an "UndefinedFormatFunc" error while formatting
-	o.Register("noeval", func(varname string, _ *Parser, _ rune, start int, _ int, _ *[]rune) (Expression, int, error) {
-		return varname, start, nil
-	}, nil)
-
-	input = `{N,noeval}`
-	mf, _ := o.Parse(input)
-	_, err = mf.Format()
-	doTestCompileError(t, input, "UndefinedFormatFunc: `noeval`", err)
 }

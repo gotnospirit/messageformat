@@ -1,3 +1,5 @@
+// @TODO(gotnospirit) add test on SetCulture, Format, getNamedKey, getFormatter
+
 package messageformat
 
 import (
@@ -19,19 +21,22 @@ import (
 // },
 // })
 
-func doParse(input string) *MessageFormat {
-	o, _ := New()
+func doParse(input string) (*MessageFormat, error) {
+	o, err := New()
+	if nil != err {
+		return nil, err
+	}
 	mf, err := o.Parse(input)
 	if nil != err {
-		return nil
+		return nil, err
 	}
-	return mf
+	return mf, nil
 }
 
 func TestSetPluralFunction(t *testing.T) {
-	mf := doParse(`{N,plural,one{1}other{2}}`)
-	if nil == mf {
-		t.Errorf("Unexpected parse failure")
+	mf, err := doParse(`{N,plural,one{1}other{2}}`)
+	if nil != err {
+		t.Errorf("Unexpected parse failure: `%s`", err.Error())
 	} else {
 		// checks we can't unset the default plural function
 		err := mf.SetPluralFunction(nil)

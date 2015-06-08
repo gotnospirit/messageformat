@@ -1,3 +1,5 @@
+// @TODO(gotnospirit) add test on readOffset
+
 package messageformat
 
 import (

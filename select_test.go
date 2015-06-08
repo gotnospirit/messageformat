@@ -1,3 +1,5 @@
+// @TODO(gotnospirit) add test on readKey, readChoice
+
 package messageformat
 
 import (
