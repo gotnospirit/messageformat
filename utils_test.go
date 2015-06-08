@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func ToStringResult(t *testing.T, data map[string]interface{}, key, expected string) {
+func toStringResult(t *testing.T, data map[string]interface{}, key, expected string) {
 	result, err := toString(data, key)
 
 	if nil != err {
@@ -17,7 +17,7 @@ func ToStringResult(t *testing.T, data map[string]interface{}, key, expected str
 	}
 }
 
-func ToStringError(t *testing.T, data map[string]interface{}, key string) {
+func toStringError(t *testing.T, data map[string]interface{}, key string) {
 	result, err := toString(data, "B")
 
 	if nil == err {
@@ -27,7 +27,29 @@ func ToStringError(t *testing.T, data map[string]interface{}, key string) {
 	}
 }
 
-func WhitespaceResult(t *testing.T, start, end int, ptr_input *[]rune, expected_char rune, expected_pos int) int {
+func toFloatResult(t *testing.T, value interface{}, expected float64) {
+	result, err := toFloat(value)
+
+	if nil != err {
+		t.Errorf("Expecting `%f` but got an error `%s`", expected, err.Error())
+	} else if expected != result {
+		t.Errorf("Expecting `%f` but got `%f`", expected, result)
+	} else if testing.Verbose() {
+		fmt.Printf("Successfully returns the expected value: `%f`\n", expected)
+	}
+}
+
+func toFloatError(t *testing.T, value interface{}) {
+	result, err := toFloat(value)
+
+	if nil == err {
+		t.Errorf("Expecting an error but got `%f`", result)
+	} else if testing.Verbose() {
+		fmt.Printf("Successfully returns an error `%s`\n", err.Error())
+	}
+}
+
+func whitespaceResult(t *testing.T, start, end int, ptr_input *[]rune, expected_char rune, expected_pos int) int {
 	char, pos := whitespace(start, end, ptr_input)
 	if expected_pos != pos {
 		t.Errorf("Expecting first non-whitespace found at %d but got %d", expected_pos, pos)
@@ -58,14 +80,14 @@ func TestWhitespace(t *testing.T) {
 	// should traverses the input, from "start" to "end"
 	// until a non-whitespace char is encountered
 	// and returns that char and its position
-	pos := WhitespaceResult(t, start, end, &input, 'h', 2)
+	pos := whitespaceResult(t, start, end, &input, 'h', 2)
 
 	// should returns the same char and position because the char
 	// at "start" position is not a whitespace
-	WhitespaceResult(t, pos, end, &input, 'h', 2)
+	whitespaceResult(t, pos, end, &input, 'h', 2)
 
 	// should returns a \0 char when the end position is reached
-	WhitespaceResult(t, pos, pos, &input, 0, 2)
+	whitespaceResult(t, pos, pos, &input, 0, 2)
 }
 
 func TestToString(t *testing.T) {
@@ -78,16 +100,31 @@ func TestToString(t *testing.T) {
 	}
 
 	// should returns an empty string when the key does not exists
-	ToStringResult(t, data, "NAME", "")
+	toStringResult(t, data, "NAME", "")
 
 	// should returns an empty string when the value is nil
-	ToStringResult(t, data, "N", "")
+	toStringResult(t, data, "N", "")
 
 	// should returns an error when the value's type is not supported
-	ToStringError(t, data, "B")
+	toStringError(t, data, "B")
 
 	// should otherwise returns a string representation (string, int, float)
-	ToStringResult(t, data, "S", "I am a string")
-	ToStringResult(t, data, "I", "42")
-	ToStringResult(t, data, "F", "0.30")
+	toStringResult(t, data, "S", "I am a string")
+	toStringResult(t, data, "I", "42")
+	toStringResult(t, data, "F", "0.30")
+}
+
+func TestToFloat(t *testing.T) {
+	// should returns an error when the value's type is not supported
+	toFloatError(t, nil)
+	toFloatError(t, "")
+	toFloatError(t, "abc")
+	toFloatError(t, "2abc")
+	toFloatError(t, "2,2")
+	toFloatError(t, true)
+
+	// should otherwise returns the expected float
+	toFloatResult(t, 12, 12.0)
+	toFloatResult(t, "0.305", 0.305)
+	toFloatResult(t, 123456.3057892, 123456.3057892)
 }

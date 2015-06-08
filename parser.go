@@ -11,7 +11,7 @@ const (
 	OpenChar   = '{'
 	CloseChar  = '}'
 	PartChar   = ','
-	SharpChar  = '#'
+	PoundChar  = '#'
 )
 
 type (

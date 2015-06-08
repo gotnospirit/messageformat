@@ -1,6 +1,9 @@
 package messageformat
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 // isWhitespace returns true if the rune is a whitespace.
 func isWhitespace(char rune) bool {
@@ -28,10 +31,14 @@ func whitespace(start, end int, ptr_input *[]rune) (rune, int) {
 }
 
 // toString retrieves a value from the given map and tries to return a string representation.
+//
 // It will returns an error if the value's type is not <nil/string/int/float64>.
 func toString(data map[string]interface{}, key string) (string, error) {
 	if v, ok := data[key]; ok {
 		switch v.(type) {
+		default:
+			return "", fmt.Errorf("toString: Unsupported type: %T", v)
+
 		case nil:
 			return "", nil
 
@@ -43,10 +50,30 @@ func toString(data map[string]interface{}, key string) (string, error) {
 
 		case float64:
 			return fmt.Sprintf("%.2f", v.(float64)), nil
-
-		default:
-			return "", fmt.Errorf("toString: Unsupported type: %T", v)
 		}
 	}
 	return "", nil
+}
+
+// toFloat converts an interface{} value to a float64.
+//
+// It will returns an error if the value's type is not <string/int/float64>.
+func toFloat(v interface{}) (float64, error) {
+	switch v.(type) {
+	default:
+		return 0, fmt.Errorf("toFloat: Unsupported type: %T", v)
+
+	case int:
+		return float64(v.(int)), nil
+
+	case float64:
+		return v.(float64), nil
+
+	case string:
+		value, err := strconv.ParseFloat(v.(string), 64)
+		if nil != err {
+			return 0, err
+		}
+		return value, nil
+	}
 }

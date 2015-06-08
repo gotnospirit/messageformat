@@ -4,16 +4,16 @@ import (
 	"bytes"
 )
 
-func formatLiteral(expr Expression, ptr_output *bytes.Buffer, _ *map[string]interface{}, _ *MessageFormat, sharp string) error {
+func formatLiteral(expr Expression, ptr_output *bytes.Buffer, _ *map[string]interface{}, _ *MessageFormat, pound string) error {
 	content := expr.([]string)
 
 	for _, c := range content {
 		if "" != c {
 			ptr_output.WriteString(c)
-		} else if "" != sharp {
-			ptr_output.WriteString(sharp)
+		} else if "" != pound {
+			ptr_output.WriteString(pound)
 		} else {
-			ptr_output.WriteRune(SharpChar)
+			ptr_output.WriteRune(PoundChar)
 		}
 	}
 	return nil
@@ -39,7 +39,7 @@ func parseLiteral(start, end int, ptr_input *[]rune) []string {
 			default:
 				e++
 
-			case OpenChar, CloseChar, SharpChar:
+			case OpenChar, CloseChar, PoundChar:
 				if escaped {
 					if i-s > gap {
 						if gap > 1 {
