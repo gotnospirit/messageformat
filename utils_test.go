@@ -111,7 +111,7 @@ func TestToString(t *testing.T) {
 	// should otherwise returns a string representation (string, int, float)
 	toStringResult(t, data, "S", "I am a string")
 	toStringResult(t, data, "I", "42")
-	toStringResult(t, data, "F", "0.30")
+	toStringResult(t, data, "F", "0.305")
 }
 
 func TestToFloat(t *testing.T) {

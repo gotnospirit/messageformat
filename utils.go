@@ -49,7 +49,7 @@ func toString(data map[string]interface{}, key string) (string, error) {
 			return fmt.Sprintf("%d", v.(int)), nil
 
 		case float64:
-			return fmt.Sprintf("%.2f", v.(float64)), nil
+			return strconv.FormatFloat(v.(float64), 'f', -1, 64), nil
 		}
 	}
 	return "", nil
