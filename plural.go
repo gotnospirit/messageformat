@@ -90,30 +90,65 @@ func parsePlural(varname string, ptr_compiler *Parser, char rune, start, end int
 // - the computed named key (MessageFormat.getNamedKey) is not a key of the given map
 func formatPlural(expr Expression, ptr_output *bytes.Buffer, data *map[string]interface{}, ptr_mf *MessageFormat, _ string) error {
 	o := expr.(*pluralExpr)
+	key := o.key
+	offset := o.offset
 
-	value, err := toString(*data, o.key)
+	value, err := toString(*data, key)
 	if nil != err {
 		return err
 	}
 
 	var choice *node
 
-	if v, ok := (*data)[o.key]; ok {
-		float_value, err := toFloat(v)
-		if nil != err {
-			return err
+	if v, ok := (*data)[key]; ok {
+		switch v.(type) {
+		default:
+			return fmt.Errorf("Plural: Unsupported type for named key: %T", v)
+
+		case int:
+			key = fmt.Sprintf("=%d", v.(int))
+
+		case float64:
+			key = "=" + strconv.FormatFloat(v.(float64), 'f', -1, 64)
+
+		case string:
+			key = "=" + v.(string)
 		}
 
-		key := "=" + strconv.FormatFloat(float_value, 'f', -1, 64)
-		choice = o.choices[key]
+		if choice = o.choices[key]; nil == choice {
+			switch v.(type) {
+			case int:
+				if 0 != offset {
+					offset_value := v.(int) - offset
+					value = fmt.Sprintf("%d", offset_value)
+					key, err = ptr_mf.getNamedKey(offset_value, false)
+				} else {
+					key, err = ptr_mf.getNamedKey(v.(int), false)
+				}
 
-		if nil == choice {
-			if 0 != o.offset {
-				float_value -= float64(o.offset)
-				value = strconv.FormatFloat(float_value, 'f', -1, 64)
+			case float64:
+				if 0 != offset {
+					offset_value := v.(float64) - float64(offset)
+					value = strconv.FormatFloat(offset_value, 'f', -1, 64)
+					key, err = ptr_mf.getNamedKey(offset_value, false)
+				} else {
+					key, err = ptr_mf.getNamedKey(v.(float64), false)
+				}
+
+			case string:
+				if 0 != offset {
+					offset_value, fError := strconv.ParseFloat(value, 64)
+					if nil != fError {
+						return fError
+					}
+					offset_value -= float64(offset)
+					value = strconv.FormatFloat(offset_value, 'f', -1, 64)
+					key, err = ptr_mf.getNamedKey(offset_value, false)
+				} else {
+					key, err = ptr_mf.getNamedKey(value, false)
+				}
 			}
 
-			key, err := ptr_mf.getNamedKey(float_value, false)
 			if nil != err {
 				return err
 			}

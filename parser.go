@@ -20,7 +20,7 @@ type (
 	// formatFunc describes a function used to format an expression into the output buffer.
 	formatFunc func(Expression, *bytes.Buffer, *map[string]interface{}, *MessageFormat, string) error
 	// pluralFunc describes a function used to produce a named key when processing a plural or selectordinal expression.
-	pluralFunc func(float64, bool) string
+	pluralFunc func(interface{}, bool) string
 
 	Parser struct {
 		parsers    map[string]parseFunc

@@ -54,26 +54,3 @@ func toString(data map[string]interface{}, key string) (string, error) {
 	}
 	return "", nil
 }
-
-// toFloat converts an interface{} value to a float64.
-//
-// It will returns an error if the value's type is not <string/int/float64>.
-func toFloat(v interface{}) (float64, error) {
-	switch v.(type) {
-	default:
-		return 0, fmt.Errorf("toFloat: Unsupported type: %T", v)
-
-	case int:
-		return float64(v.(int)), nil
-
-	case float64:
-		return v.(float64), nil
-
-	case string:
-		value, err := strconv.ParseFloat(v.(string), 64)
-		if nil != err {
-			return 0, err
-		}
-		return value, nil
-	}
-}

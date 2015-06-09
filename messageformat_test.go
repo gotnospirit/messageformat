@@ -43,22 +43,26 @@ func TestSetPluralFunction(t *testing.T) {
 		doTestError(t, "PluralFunctionRequired", err)
 
 		data := map[string]interface{}{"N": 1}
-		result, _ := mf.FormatMap(data)
-		if "1" != result {
-			t.Errorf("Unexpected format result")
+		result, err := mf.FormatMap(data)
+		if nil != err {
+			t.Errorf("Unexpected error : `%s`", err.Error())
+		} else if "1" != result {
+			t.Errorf("Unexpected format result : `%s`", result)
 		} else {
 			// checks we can set a new plural function and get a different result
-			err := mf.SetPluralFunction(func(float64, bool) string {
+			err := mf.SetPluralFunction(func(interface{}, bool) string {
 				return "other"
 			})
 
 			if nil != err {
 				t.Errorf("Unexpected error <%s>", err)
 			} else {
-				result, _ := mf.FormatMap(data)
+				result, err := mf.FormatMap(data)
 
-				if "2" != result {
-					t.Errorf("Unexpected format result")
+				if nil != err {
+					t.Errorf("Unexpected error : `%s`", err.Error())
+				} else if "2" != result {
+					t.Errorf("Unexpected format result : `%s`", result)
 				} else if testing.Verbose() {
 					fmt.Printf("- Got expected value <%s>\n", result)
 				}

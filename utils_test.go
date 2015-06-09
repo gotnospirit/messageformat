@@ -27,28 +27,6 @@ func toStringError(t *testing.T, data map[string]interface{}, key string) {
 	}
 }
 
-func toFloatResult(t *testing.T, value interface{}, expected float64) {
-	result, err := toFloat(value)
-
-	if nil != err {
-		t.Errorf("Expecting `%f` but got an error `%s`", expected, err.Error())
-	} else if expected != result {
-		t.Errorf("Expecting `%f` but got `%f`", expected, result)
-	} else if testing.Verbose() {
-		fmt.Printf("Successfully returns the expected value: `%f`\n", expected)
-	}
-}
-
-func toFloatError(t *testing.T, value interface{}) {
-	result, err := toFloat(value)
-
-	if nil == err {
-		t.Errorf("Expecting an error but got `%f`", result)
-	} else if testing.Verbose() {
-		fmt.Printf("Successfully returns an error `%s`\n", err.Error())
-	}
-}
-
 func whitespaceResult(t *testing.T, start, end int, ptr_input *[]rune, expected_char rune, expected_pos int) int {
 	char, pos := whitespace(start, end, ptr_input)
 	if expected_pos != pos {
@@ -112,19 +90,4 @@ func TestToString(t *testing.T) {
 	toStringResult(t, data, "S", "I am a string")
 	toStringResult(t, data, "I", "42")
 	toStringResult(t, data, "F", "0.305")
-}
-
-func TestToFloat(t *testing.T) {
-	// should returns an error when the value's type is not supported
-	toFloatError(t, nil)
-	toFloatError(t, "")
-	toFloatError(t, "abc")
-	toFloatError(t, "2abc")
-	toFloatError(t, "2,2")
-	toFloatError(t, true)
-
-	// should otherwise returns the expected float
-	toFloatResult(t, 12, 12.0)
-	toFloatResult(t, "0.305", 0.305)
-	toFloatResult(t, 123456.3057892, 123456.3057892)
 }

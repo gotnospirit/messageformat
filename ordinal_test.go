@@ -9,9 +9,9 @@ func TestSelectOrdinal(t *testing.T) {
 		"The {FLOOR, selectordinal, one{#st} two{#nd} few{#rd} other{#th}} floor.",
 		[]Expectation{
 			{map[string]interface{}{"FLOOR": 0}, "The 0th floor."},
-			{map[string]interface{}{"FLOOR": 1}, "The 1st floor."},
-			{map[string]interface{}{"FLOOR": 2}, "The 2nd floor."},
-			{map[string]interface{}{"FLOOR": 3}, "The 3rd floor."},
+			{map[string]interface{}{"FLOOR": 1.0}, "The 1st floor."},
+			{map[string]interface{}{"FLOOR": "2"}, "The 2nd floor."},
+			{map[string]interface{}{"FLOOR": "3.00"}, "The 3.00rd floor."},
 			{map[string]interface{}{"FLOOR": 4}, "The 4th floor."},
 			{map[string]interface{}{"FLOOR": 101}, "The 101st floor."},
 			{nil, "The #th floor."},

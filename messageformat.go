@@ -46,11 +46,11 @@ func (x *MessageFormat) FormatMap(data map[string]interface{}) (string, error) {
 	return buf.String(), nil
 }
 
-func (x *MessageFormat) getNamedKey(n float64, ordinal bool) (string, error) {
+func (x *MessageFormat) getNamedKey(value interface{}, ordinal bool) (string, error) {
 	if nil == x.plural {
 		return "", fmt.Errorf("UndefinedPluralFunc")
 	}
-	return x.plural(n, ordinal), nil
+	return x.plural(value, ordinal), nil
 }
 
 func (x *MessageFormat) getFormatter(key string) (formatFunc, error) {

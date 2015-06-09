@@ -2,6 +2,8 @@ package messageformat
 
 import (
 	"bytes"
+	"fmt"
+	"strconv"
 )
 
 // formatOrdinal is the format function associated with the "selectordinal" type.
@@ -24,12 +26,20 @@ func formatOrdinal(expr Expression, ptr_output *bytes.Buffer, data *map[string]i
 	var choice *node
 
 	if v, ok := (*data)[o.key]; ok {
-		float_value, err := toFloat(v)
-		if nil != err {
-			return err
+		switch v.(type) {
+		default:
+			return fmt.Errorf("Ordinal: Unsupported type for named key: %T", v)
+
+		case int, float64:
+
+		case string:
+			_, err := strconv.ParseFloat(v.(string), 64)
+			if nil != err {
+				return err
+			}
 		}
 
-		key, err := ptr_mf.getNamedKey(float_value, true)
+		key, err := ptr_mf.getNamedKey(v, true)
 		if nil != err {
 			return err
 		}
