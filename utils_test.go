@@ -3,6 +3,7 @@ package messageformat
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func toStringResult(t *testing.T, data map[string]interface{}, key, expected string) {
@@ -90,4 +91,62 @@ func TestToString(t *testing.T) {
 	toStringResult(t, data, "S", "I am a string")
 	toStringResult(t, data, "I", "42")
 	toStringResult(t, data, "F", "0.305")
+}
+
+func TestToStringNumericTypes(t *testing.T) {
+	data := map[string]interface{}{
+		"byteMax":    byte(255),
+		"uint":       uint(123456),
+		"uint8Max":   uint8(255),
+		"uint16Max":  uint16(65535),
+		"uint32Max":  uint32(4294967295),
+		"uint64Max":  uint64(18446744073709551615),
+		"int":        int(-123456),
+		"int8Min":    int8(-128),
+		"int8Max":    int8(127),
+		"int16Min":   int16(-32768),
+		"int16Max":   int16(32767),
+		"int32Min":   int32(-2147483648),
+		"int32Max":   int32(2147483647),
+		"int64Min":   int64(-9223372036854775808),
+		"int64Max":   int64(9223372036854775807),
+		"float32":    float32(3.14),
+		"float64":    float64(3.14e-10),
+		"complex":    complex(1.23, 9.87),
+		"complex64":  complex64(1.23 + 9.87i),
+		"complex128": complex128(1.23 + 9.87i),
+		"rune":       rune('a'),
+		"uintptr":    uintptr(0x75bcd15),
+	}
+
+	toStringResult(t, data, "byteMax", "255")
+	toStringResult(t, data, "uint", "123456")
+	toStringResult(t, data, "uint8Max", "255")
+	toStringResult(t, data, "uint16Max", "65535")
+	toStringResult(t, data, "uint32Max", "4294967295")
+	toStringResult(t, data, "uint64Max", "18446744073709551615")
+	toStringResult(t, data, "int", "-123456")
+	toStringResult(t, data, "int8Min", "-128")
+	toStringResult(t, data, "int8Max", "127")
+	toStringResult(t, data, "int16Min", "-32768")
+	toStringResult(t, data, "int16Max", "32767")
+	toStringResult(t, data, "int32Min", "-2147483648")
+	toStringResult(t, data, "int32Max", "2147483647")
+	toStringResult(t, data, "int64Min", "-9223372036854775808")
+	toStringResult(t, data, "int64Max", "9223372036854775807")
+	toStringResult(t, data, "float32", "3.14")
+	toStringResult(t, data, "float64", "0.000000000314")
+	toStringResult(t, data, "complex", "(1.23+9.87i)")
+	toStringResult(t, data, "complex64", "(1.23+9.87i)")
+	toStringResult(t, data, "complex128", "(1.23+9.87i)")
+	toStringResult(t, data, "rune", "97")
+	toStringResult(t, data, "uintptr", "075bcd15")
+}
+
+func TestToStringTimeDuration(t *testing.T) {
+	du := time.Date(1970, 0, 1, 0, 0, 0, 0, time.UTC).Sub(time.Date(1960, 0, 1, 0, 0, 0, 0, time.UTC))
+	data := map[string]interface{}{
+		"duration": du,
+	}
+	toStringResult(t, data, "duration", "87672h0m0s")
 }
