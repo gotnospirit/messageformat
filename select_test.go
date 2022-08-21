@@ -54,11 +54,19 @@ func TestSelect(t *testing.T) {
 		},
 	})
 
+	doTest(t, Test{
+		`{isTrueOrFalse, select, true {True} other {False}}`,
+		[]Expectation{
+			{map[string]interface{}{"isTrueOrFalse": true}, `True`},
+			{map[string]interface{}{"isTrueOrFalse": false}, `False`},
+		},
+	})
+
 	doTestException(
 		t,
 		"{VAR,select,other{succeed}}",
-		map[string]interface{}{"VAR": true},
-		"toString: Unsupported type: bool",
+		map[string]interface{}{"VAR": struct{}{}},
+		"toString: Unsupported type: struct {}",
 	)
 }
 
