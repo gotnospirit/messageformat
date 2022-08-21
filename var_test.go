@@ -56,8 +56,8 @@ func TestVar(t *testing.T) {
 	doTestException(
 		t,
 		"{VAR}",
-		map[string]interface{}{"VAR": true},
-		"toString: Unsupported type: bool",
+		map[string]interface{}{"VAR": struct{}{}},
+		"toString: Unsupported type: struct {}",
 	)
 }
 

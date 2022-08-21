@@ -62,7 +62,7 @@ func parseSelect(varname string, ptr_compiler *Parser, char rune, start, end int
 // - its string representation is not a key of the given map
 //
 // It will returns an error if :
-// - the associated value can't be convert to string (i.e. bool, ...)
+// - the associated value can't be convert to string (i.e. struct {}, ...)
 func formatSelect(expr Expression, ptr_output *bytes.Buffer, data *map[string]interface{}, ptr_mf *MessageFormat, _ string) error {
 	o := expr.(*selectExpr)
 

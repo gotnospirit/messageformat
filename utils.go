@@ -33,7 +33,7 @@ func whitespace(start, end int, ptr_input *[]rune) (rune, int) {
 
 // toString retrieves a value from the given map and tries to return a string representation.
 //
-// It will returns an error if the value's type is not <nil/string/numeric/time.Duration>.
+// It will returns an error if the value's type is not <nil/string/bool/numeric/time.Duration/fmt.Stringer>.
 func toString(data map[string]interface{}, key string) (string, error) {
 	if v, ok := data[key]; ok {
 		switch v.(type) {
@@ -42,6 +42,9 @@ func toString(data map[string]interface{}, key string) (string, error) {
 
 		case nil:
 			return "", nil
+
+		case bool:
+			return strconv.FormatBool(v.(bool)), nil
 
 		case string:
 			return v.(string), nil
@@ -93,6 +96,9 @@ func toString(data map[string]interface{}, key string) (string, error) {
 
 		case time.Duration:
 			return v.(time.Duration).String(), nil
+
+		case fmt.Stringer:
+			return v.(fmt.Stringer).String(), nil
 		}
 	}
 	return "", nil

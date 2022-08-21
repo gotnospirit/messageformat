@@ -74,8 +74,8 @@ func TestToString(t *testing.T) {
 		"S": "I am a string",
 		"I": 42,
 		"F": 0.305,
-		"B": true,
 		"N": nil,
+		"B": true,
 	}
 
 	// should returns an empty string when the key does not exists
@@ -84,13 +84,11 @@ func TestToString(t *testing.T) {
 	// should returns an empty string when the value is nil
 	toStringResult(t, data, "N", "")
 
-	// should returns an error when the value's type is not supported
-	toStringError(t, data, "B")
-
 	// should otherwise returns a string representation (string, int, float)
 	toStringResult(t, data, "S", "I am a string")
 	toStringResult(t, data, "I", "42")
 	toStringResult(t, data, "F", "0.305")
+	toStringResult(t, data, "B", "true")
 }
 
 func TestToStringNumericTypes(t *testing.T) {
@@ -143,10 +141,39 @@ func TestToStringNumericTypes(t *testing.T) {
 	toStringResult(t, data, "uintptr", "075bcd15")
 }
 
+func TestToStringBool(t *testing.T) {
+	data := map[string]interface{}{
+		"boolTrue":  bool(true),
+		"boolFalse": bool(false),
+	}
+
+	toStringResult(t, data, "boolTrue", "true")
+	toStringResult(t, data, "boolFalse", "false")
+}
+
 func TestToStringTimeDuration(t *testing.T) {
 	du := time.Date(1970, 0, 1, 0, 0, 0, 0, time.UTC).Sub(time.Date(1960, 0, 1, 0, 0, 0, 0, time.UTC))
 	data := map[string]interface{}{
 		"duration": du,
 	}
 	toStringResult(t, data, "duration", "87672h0m0s")
+}
+
+type testStruct struct {
+	Value int
+}
+
+// Implement the fmt.Stringer interface
+func (t testStruct) String() string {
+	return fmt.Sprintf("%d", t.Value)
+}
+
+func TestToStringStringer(t *testing.T) {
+	data := map[string]interface{}{
+		"struct":    testStruct{Value: 1},
+		"structPtr": &testStruct{Value: 2},
+	}
+
+	toStringResult(t, data, "struct", "1")
+	toStringResult(t, data, "structPtr", "2")
 }

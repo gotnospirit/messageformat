@@ -34,8 +34,8 @@ func TestPlural(t *testing.T) {
 	doTestException(
 		t,
 		"{NUM,plural,other{b}}",
-		map[string]interface{}{"NUM": true},
-		"toString: Unsupported type: bool",
+		map[string]interface{}{"NUM": struct{}{}},
+		"toString: Unsupported type: struct {}",
 	)
 }
 
