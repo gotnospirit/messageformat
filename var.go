@@ -5,8 +5,8 @@ import (
 	"errors"
 )
 
-func formatVar(expr Expression, ptr_output *bytes.Buffer, data *map[string]interface{}, _ *MessageFormat, _ string) error {
-	value, err := toString(*data, expr.(string))
+func (f *formatter) formatVar(expr Expression, ptr_output *bytes.Buffer, data map[string]interface{}) error {
+	value, err := toString(data, expr.(string))
 	if nil != err {
 		return err
 	}

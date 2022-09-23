@@ -7,20 +7,23 @@ import (
 )
 
 type pluralExpr struct {
-	selectExpr
-	offset int
+	Select selectExpr `json:"select"`
+	Offset int        `json:"offset"`
 }
 
-func parsePlural(varname string, ptr_compiler *Parser, char rune, start, end int, ptr_input *[]rune) (Expression, int, error) {
-	if PartChar != char {
+func (p *parser) parsePlural(varname string, char rune, start, end int, ptr_input *[]rune) (Expression, int, error) {
+	if char != PartChar {
 		return nil, start, fmt.Errorf("MalformedOption")
 	}
 
 	hasOtherChoice := false
 
-	result := new(pluralExpr)
-	result.key = varname
-	result.choices = make(map[string]*node)
+	result := &pluralExpr{
+		Select: selectExpr{
+			Key:     varname,
+			Choices: make(map[string]*ParseTree),
+		},
+	}
 
 	pos := start + 1
 
@@ -31,8 +34,8 @@ func parsePlural(varname string, ptr_compiler *Parser, char rune, start, end int
 			return nil, i, err
 		}
 
-		if ':' == char {
-			if "offset" != key {
+		if char == ColonChar {
+			if key != "offset" {
 				return nil, i, fmt.Errorf("UnsupportedExtension: `%s`", key)
 			}
 
@@ -41,34 +44,33 @@ func parsePlural(varname string, ptr_compiler *Parser, char rune, start, end int
 				return nil, j, err
 			}
 
-			result.offset = offset
+			result.Offset = offset
 
 			if isWhitespace(c) {
 				j++
 			}
 
 			k, c, j, err := readKey(c, j, end, ptr_input)
-
-			if "" == k {
+			if err != nil || k == "" {
 				return nil, j, fmt.Errorf("MissingChoiceName")
 			}
 
 			key, char, i = k, c, j
 		}
 
-		if "other" == key {
-			hasOtherChoice = true
-		}
-
-		choice, c, i, err := readChoice(ptr_compiler, char, i, end, ptr_input)
+		choice, c, i, err := p.readChoice(char, i, end, ptr_input)
 		if nil != err {
 			return nil, i, err
 		}
 
-		result.choices[key] = choice
+		if key == "other" {
+			hasOtherChoice = true
+		}
+
+		result.Select.Choices[key] = choice
 		pos, char = i, c
 
-		if CloseChar == char {
+		if char == CloseChar {
 			break
 		}
 	}
@@ -76,6 +78,7 @@ func parsePlural(varname string, ptr_compiler *Parser, char rune, start, end int
 	if !hasOtherChoice {
 		return nil, pos, fmt.Errorf("MissingMandatoryChoice")
 	}
+
 	return result, pos, nil
 }
 
@@ -88,78 +91,84 @@ func parsePlural(varname string, ptr_compiler *Parser, char rune, start, end int
 // It will falls back to the "other" choice if :
 // - its key can't be found in the given map
 // - the computed named key (MessageFormat.getNamedKey) is not a key of the given map
-func formatPlural(expr Expression, ptr_output *bytes.Buffer, data *map[string]interface{}, ptr_mf *MessageFormat, _ string) error {
-	o := expr.(*pluralExpr)
-	key := o.key
-	offset := o.offset
+func (f *formatter) formatPlural(expr Expression, ptr_output *bytes.Buffer, data map[string]any) error {
+	o, ok := expr.(*pluralExpr)
+	if !ok {
+		return fmt.Errorf("expression is not a plural")
+	}
 
-	value, err := toString(*data, key)
+	key := o.Select.Key
+	offset := o.Offset
+
+	value, err := toString(data, key)
 	if nil != err {
 		return err
 	}
 
-	var choice *node
+	var choice *ParseTree
 
-	if v, ok := (*data)[key]; ok {
-		switch v.(type) {
-		default:
-			return fmt.Errorf("Plural: Unsupported type for named key: %T", v)
-
+	if v, ok := data[key]; ok {
+		switch val := v.(type) {
 		case int:
-			key = fmt.Sprintf("=%d", v.(int))
+			key = fmt.Sprintf("=%d", val)
 
 		case float64:
-			key = "=" + strconv.FormatFloat(v.(float64), 'f', -1, 64)
+			key = "=" + strconv.FormatFloat(val, 'f', -1, 64)
 
 		case string:
-			key = "=" + v.(string)
+			key = "=" + val
+
+		default:
+			return fmt.Errorf("unsupported type for named plural key: %T", v)
+
 		}
 
-		if choice = o.choices[key]; nil == choice {
-			switch v.(type) {
+		if choice = o.Select.Choices[key]; nil == choice {
+			switch val := v.(type) {
 			case int:
-				if 0 != offset {
-					offset_value := v.(int) - offset
+				if offset != 0 {
+					offset_value := val - offset
 					value = fmt.Sprintf("%d", offset_value)
-					key, err = ptr_mf.getNamedKey(offset_value, false)
+					key, err = f.getNamedKey(offset_value, false)
 				} else {
-					key, err = ptr_mf.getNamedKey(v.(int), false)
+					key, err = f.getNamedKey(v.(int), false)
 				}
 
 			case float64:
-				if 0 != offset {
-					offset_value := v.(float64) - float64(offset)
+				if offset != 0 {
+					offset_value := val - float64(offset)
 					value = strconv.FormatFloat(offset_value, 'f', -1, 64)
-					key, err = ptr_mf.getNamedKey(offset_value, false)
+					key, err = f.getNamedKey(offset_value, false)
 				} else {
-					key, err = ptr_mf.getNamedKey(v.(float64), false)
+					key, err = f.getNamedKey(v.(float64), false)
 				}
 
 			case string:
-				if 0 != offset {
+				if offset != 0 {
 					offset_value, fError := strconv.ParseFloat(value, 64)
 					if nil != fError {
 						return fError
 					}
 					offset_value -= float64(offset)
 					value = strconv.FormatFloat(offset_value, 'f', -1, 64)
-					key, err = ptr_mf.getNamedKey(offset_value, false)
+					key, err = f.getNamedKey(offset_value, false)
 				} else {
-					key, err = ptr_mf.getNamedKey(value, false)
+					key, err = f.getNamedKey(value, false)
 				}
 			}
 
 			if nil != err {
 				return err
 			}
-			choice = o.choices[key]
+			choice = o.Select.Choices[key]
 		}
 	}
 
-	if nil == choice {
-		choice = o.choices["other"]
+	if choice == nil {
+		choice = o.Select.Choices["other"]
 	}
-	return choice.format(ptr_output, data, ptr_mf, value)
+
+	return f.format(choice, ptr_output, data, value)
 }
 
 func readOffset(start, end int, ptr_input *[]rune) (int, rune, int, error) {
@@ -179,7 +188,7 @@ func readOffset(start, end int, ptr_input *[]rune) (int, rune, int, error) {
 			}
 
 		case ' ', '\r', '\n', '\t', OpenChar, CloseChar:
-			if 0 != buf.Len() {
+			if buf.Len() != 0 {
 				result, err := strconv.Atoi(buf.String())
 				if nil != err {
 					return 0, char, pos, fmt.Errorf("BadCast")

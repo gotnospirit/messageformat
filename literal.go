@@ -2,24 +2,29 @@ package messageformat
 
 import (
 	"bytes"
+	"fmt"
 )
 
-func formatLiteral(expr Expression, ptr_output *bytes.Buffer, _ *map[string]interface{}, _ *MessageFormat, pound string) error {
-	content := expr.([]string)
+func (f *formatter) formatLiteral(expr Expression, ptr_output *bytes.Buffer, pound string) error {
+	content, ok := expr.([]string)
+	if !ok {
+		return fmt.Errorf("the Expression type must be []string, got: %T", expr)
+	}
 
 	for _, c := range content {
-		if "" != c {
+		if c != "" {
 			ptr_output.WriteString(c)
-		} else if "" != pound {
+		} else if pound != "" {
 			ptr_output.WriteString(pound)
 		} else {
 			ptr_output.WriteRune(PoundChar)
 		}
 	}
+
 	return nil
 }
 
-func parseLiteral(start, end int, ptr_input *[]rune) []string {
+func (p *parser) parseLiteral(start, end int, ptr_input *[]rune) []string {
 	var items []int
 
 	input := *ptr_input

@@ -18,7 +18,7 @@ func TestSelectOrdinal(t *testing.T) {
 		},
 	})
 
-	doTestException(
+	doTestFormatException(
 		t,
 		"{VAR,selectordinal,other{succeed}}",
 		map[string]interface{}{"VAR": struct{}{}},

@@ -1,35 +1,24 @@
 package messageformat
 
-import "bytes"
+type Expression interface{}
 
-type (
-	Expression interface{}
-
-	node struct {
-		children []*nodeExpr
-	}
-
-	nodeExpr struct {
-		ctype string
-		expr  Expression
-	}
-)
-
-func (x *node) add(ctype string, child Expression) {
-	x.children = append(x.children, &nodeExpr{ctype, child})
+type ParseTree struct {
+	Children []*Node `json:"children"`
 }
 
-func (x *node) format(ptr_output *bytes.Buffer, data *map[string]interface{}, ptr_mf *MessageFormat, pound string) error {
-	for _, child := range x.children {
-		ctype := child.ctype
+type Node struct {
+	Type string     `json:"type"`
+	Expr Expression `json:"expr"`
+}
 
-		fn, err := ptr_mf.getFormatter(ctype)
-		if nil != err {
-			return err
-		}
+func (x *ParseTree) add(ctype string, child Expression) {
+	x.Children = append(x.Children, &Node{ctype, child})
+}
 
-		err = fn(child.expr, ptr_output, data, ptr_mf, pound)
-		if nil != err {
+func (x *ParseTree) forEach(fn func(n *Node) error) error {
+	for _, child := range x.Children {
+		err := fn(child)
+		if err != nil {
 			return err
 		}
 	}

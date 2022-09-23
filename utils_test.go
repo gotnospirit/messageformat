@@ -18,11 +18,13 @@ func toStringResult(t *testing.T, data map[string]interface{}, key, expected str
 	}
 }
 
-func toStringError(t *testing.T, data map[string]interface{}, key string) {
-	result, err := toString(data, "B")
+func toStringError(t *testing.T, data map[string]interface{}, key string, expected string) {
+	_, err := toString(data, key)
 
-	if nil == err {
-		t.Errorf("Expecting an error but got `%s`", result)
+	if err == nil {
+		t.Errorf("Expecting an error but got none")
+	} else if expected != err.Error() {
+		t.Errorf("Expecting error `%s` but got `%s`", expected, err)
 	} else if testing.Verbose() {
 		fmt.Printf("Successfully returns an error `%s`\n", err.Error())
 	}
@@ -89,6 +91,7 @@ func TestToString(t *testing.T) {
 	toStringResult(t, data, "I", "42")
 	toStringResult(t, data, "F", "0.305")
 	toStringResult(t, data, "B", "true")
+
 }
 
 func TestToStringNumericTypes(t *testing.T) {
@@ -176,4 +179,12 @@ func TestToStringStringer(t *testing.T) {
 
 	toStringResult(t, data, "struct", "1")
 	toStringResult(t, data, "structPtr", "2")
+}
+
+func TestToStringException(t *testing.T) {
+	data := map[string]any{
+		"emptyStruct": struct{}{},
+	}
+
+	toStringError(t, data, "emptyStruct", "toString: Unsupported type: struct {}")
 }
