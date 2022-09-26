@@ -19,7 +19,11 @@ type Expectation struct {
 
 func doTest(t *testing.T, data Test) {
 	o := NewParser()
-	f := NewFormatter()
+	f, err := NewFormatter()
+	if err != nil {
+		t.Errorf("Failed to create new Formatter: %s", err)
+		return
+	}
 
 	pt, err := o.Parse(data.input)
 
@@ -43,7 +47,11 @@ func doTest(t *testing.T, data Test) {
 // Executes test code, expecting an exception when calling format.FormatMap
 func doTestFormatException(t *testing.T, input string, data map[string]interface{}, expected string) {
 	o := NewParser()
-	f := NewFormatter()
+	f, err := NewFormatter()
+	if err != nil {
+		t.Errorf("Failed to create new Formatter: %s", err)
+		return
+	}
 
 	pt, err := o.Parse(input)
 	if err != nil {
@@ -72,19 +80,13 @@ func doTestCompileError(t *testing.T, input, expected string, err error) {
 	}
 }
 
-func doTestError(t *testing.T, expected string, err error) {
-	if nil == err {
-		t.Errorf("Expecting exception <%s> but got none", expected)
-	} else if err.Error() != expected {
-		t.Errorf("Expecting exception <%s> but got <%s>", expected, err.Error())
-	} else if testing.Verbose() {
-		fmt.Printf("- Got expected exception <%s>\n", expected)
-	}
-}
-
 func doBenchmarkExecute(b *testing.B, input, expected string, data map[string]interface{}) (pt *ParseTree) {
 	o := NewParser()
-	f := NewFormatter()
+	f, err := NewFormatter()
+	if err != nil {
+		b.Errorf("Failed to create new Formatter: %s", err)
+		return
+	}
 
 	pt, _ = o.Parse(input)
 

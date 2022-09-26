@@ -4,17 +4,6 @@ import (
 	"fmt"
 )
 
-type Parser interface {
-	Parse(string) (*ParseTree, error)
-}
-
-type parser struct {
-}
-
-func NewParser() Parser {
-	return &parser{}
-}
-
 const (
 	EscapeChar = '\\'
 	OpenChar   = '{'
@@ -24,8 +13,15 @@ const (
 	ColonChar  = ':'
 )
 
-// pluralFunc describes a function used to produce a named key when processing a plural or selectordinal expression.
-type pluralFunc func(interface{}, bool) string
+type Parser interface {
+	Parse(string) (*ParseTree, error)
+}
+
+type parser struct{}
+
+func NewParser() Parser {
+	return &parser{}
+}
 
 func (x *parser) Parse(input string) (*ParseTree, error) {
 	runes := []rune(input)

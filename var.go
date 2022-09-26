@@ -23,7 +23,7 @@ func readVar(start, end int, ptr_input *[]rune) (string, rune, int, error) {
 		switch char {
 		default:
 			// [_0-9a-zA-Z]+
-			if '_' != char && (char < '0' || char > '9') && (char < 'A' || char > 'Z') && (char < 'a' || char > 'z') {
+			if char != '_' && (char < '0' || char > '9') && (char < 'A' || char > 'Z') && (char < 'a' || char > 'z') {
 				return "", char, pos, errors.New("InvalidFormat")
 			} else if pos != lc_pos { // non continu (inner whitespace)
 				return "", char, pos, errors.New("InvalidFormat")

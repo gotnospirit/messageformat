@@ -28,7 +28,7 @@ func (p *parser) parsePlural(varname string, char rune, start, end int, ptr_inpu
 	pos := start + 1
 
 	for pos < end {
-		key, char, i, err := readKey(char, pos, end, ptr_input)
+		key, char, i, err := readKey(pos, end, ptr_input)
 
 		if nil != err {
 			return nil, i, err
@@ -50,7 +50,7 @@ func (p *parser) parsePlural(varname string, char rune, start, end int, ptr_inpu
 				j++
 			}
 
-			k, c, j, err := readKey(c, j, end, ptr_input)
+			k, c, j, err := readKey(j, end, ptr_input)
 			if err != nil || k == "" {
 				return nil, j, fmt.Errorf("MissingChoiceName")
 			}

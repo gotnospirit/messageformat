@@ -24,7 +24,7 @@ func (p *parser) parseSelect(varname string, char rune, start, end int, ptr_inpu
 	pos := start + 1
 
 	for pos < end {
-		key, char, i, err := readKey(char, pos, end, ptr_input)
+		key, char, i, err := readKey(pos, end, ptr_input)
 
 		if nil != err {
 			return nil, i, err
@@ -32,7 +32,9 @@ func (p *parser) parseSelect(varname string, char rune, start, end int, ptr_inpu
 			return nil, i, errors.New("UnexpectedExtension")
 		}
 
-		hasOtherChoice = key == "other"
+		if key == "other" {
+			hasOtherChoice = true
+		}
 
 		choice, char, i, err := p.readChoice(char, i, end, ptr_input)
 		if nil != err {
@@ -77,7 +79,7 @@ func (f *formatter) formatSelect(expr Expression, ptr_output *bytes.Buffer, data
 	return f.format(choice, ptr_output, data, value)
 }
 
-func readKey(char rune, start, end int, ptr_input *[]rune) (string, rune, int, error) {
+func readKey(start, end int, ptr_input *[]rune) (string, rune, int, error) {
 	char, pos := whitespace(start, end, ptr_input)
 	fc_pos, lc_pos := pos, pos
 

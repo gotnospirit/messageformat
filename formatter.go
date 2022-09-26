@@ -7,26 +7,27 @@ import (
 	"github.com/gotnospirit/makeplural/plural"
 )
 
+// pluralFunc describes a function used to produce a named key when processing a plural or selectordinal expression.
+type pluralFunc func(interface{}, bool) string
+
 type Formatter interface {
 	Format(*ParseTree) (string, error)
 	FormatMap(*ParseTree, map[string]any) (string, error)
 }
 
-func NewFormatter() Formatter {
+func NewFormatter() (Formatter, error) {
 	return NewFormatterWithCulture("en")
 }
 
-func NewFormatterWithCulture(culture string) Formatter {
+func NewFormatterWithCulture(culture string) (Formatter, error) {
 	f := &formatter{}
-	err := f.SetCulture("en")
 
-	// TODO: return an error here?
-	// refactor to not throw
+	err := f.SetCulture("en")
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return f
+	return f, nil
 }
 
 type formatter struct {
@@ -34,7 +35,6 @@ type formatter struct {
 }
 
 func (x *formatter) SetCulture(name string) error {
-	// TODO: refactor to not throw
 	fn, err := plural.GetFunc(name)
 	if nil != err {
 		return err
@@ -69,7 +69,7 @@ func (f *formatter) FormatMap(n *ParseTree, data map[string]any) (string, error)
 }
 
 func (f *formatter) format(n *ParseTree, buf *bytes.Buffer, data map[string]any, value string) error {
-	err := n.forEach(func(n *Node) error {
+	err := n.ForEach(func(n *Node) error {
 		switch n.Type {
 		case "literal":
 			return f.formatLiteral(n.Expr, buf, value)

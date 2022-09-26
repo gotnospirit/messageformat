@@ -28,7 +28,7 @@ func (f *formatter) formatOrdinal(expr Expression, ptr_output *bytes.Buffer, dat
 	if v, ok := data[o.Key]; ok {
 		switch val := v.(type) {
 		default:
-			return fmt.Errorf("Ordinal: Unsupported type for named key: %T", val)
+			return fmt.Errorf("ordinal: Unsupported type for named key: %T", val)
 
 		case int, float64:
 
