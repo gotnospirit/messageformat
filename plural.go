@@ -6,8 +6,8 @@ import (
 	"strconv"
 )
 
-type pluralExpr struct {
-	Select selectExpr `json:"select"`
+type PluralExpr struct {
+	Select SelectExpr `json:"select"`
 	Offset int        `json:"offset"`
 }
 
@@ -18,8 +18,8 @@ func (p *parser) parsePlural(varname string, char rune, start, end int, ptr_inpu
 
 	hasOtherChoice := false
 
-	result := &pluralExpr{
-		Select: selectExpr{
+	result := &PluralExpr{
+		Select: SelectExpr{
 			Key:     varname,
 			Choices: make(map[string]*ParseTree),
 		},
@@ -92,7 +92,7 @@ func (p *parser) parsePlural(varname string, char rune, start, end int, ptr_inpu
 // - its key can't be found in the given map
 // - the computed named key (MessageFormat.getNamedKey) is not a key of the given map
 func (f *formatter) formatPlural(expr Expression, ptr_output *bytes.Buffer, data map[string]any) error {
-	o, ok := expr.(*pluralExpr)
+	o, ok := expr.(*PluralExpr)
 	if !ok {
 		return fmt.Errorf("expression is not a plural")
 	}

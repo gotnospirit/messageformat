@@ -16,7 +16,7 @@ import (
 // - its key can't be found in the given map
 // - the computed named key (MessageFormat.getNamedKey) is not a key of the given map
 func (f *formatter) formatOrdinal(expr Expression, ptr_output *bytes.Buffer, data map[string]any) error {
-	o := expr.(*selectExpr)
+	o := expr.(*SelectExpr)
 
 	value, err := toString(data, o.Key)
 	if err != nil {

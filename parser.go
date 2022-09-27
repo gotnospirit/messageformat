@@ -55,8 +55,10 @@ func (x *parser) parseExpression(start, end int, ptr_input *[]rune) (string, Exp
 		return "", nil, pos, fmt.Errorf("MissingVarName")
 	}
 
-	if CloseChar == char {
-		return "var", varname, pos, nil
+	if char == CloseChar {
+		return "var", VarExpr{
+			Name: varname,
+		}, pos, nil
 	}
 
 	ctype, char, pos, err := readVar(pos+1, end, ptr_input)

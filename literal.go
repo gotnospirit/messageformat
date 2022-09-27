@@ -5,15 +5,20 @@ import (
 	"fmt"
 )
 
+// LiteralExpr represents a string literal
+type LiteralExpr struct {
+	Values []string
+}
+
 func (f *formatter) formatLiteral(expr Expression, ptr_output *bytes.Buffer, pound string) error {
-	content, ok := expr.([]string)
+	literal, ok := expr.(LiteralExpr)
 	if !ok {
-		return fmt.Errorf("the Expression type must be []string, got: %T", expr)
+		return fmt.Errorf("the Expression type must be LiteralExpr, got: %T", expr)
 	}
 
-	for _, c := range content {
-		if c != "" {
-			ptr_output.WriteString(c)
+	for _, val := range literal.Values {
+		if val != "" {
+			ptr_output.WriteString(val)
 		} else if pound != "" {
 			ptr_output.WriteString(pound)
 		} else {
@@ -24,7 +29,7 @@ func (f *formatter) formatLiteral(expr Expression, ptr_output *bytes.Buffer, pou
 	return nil
 }
 
-func (p *parser) parseLiteral(start, end int, ptr_input *[]rune) []string {
+func (p *parser) parseLiteral(start, end int, ptr_input *[]rune) LiteralExpr {
 	var items []int
 
 	input := *ptr_input
@@ -77,9 +82,13 @@ func (p *parser) parseLiteral(start, end int, ptr_input *[]rune) []string {
 	}
 
 	n := len(items)
-	result := make([]string, n/2)
-	for i := 0; i < n; i += 2 {
-		result[i/2] = string(input[items[i]:items[i+1]])
+	expr := LiteralExpr{
+		Values: make([]string, n/2),
 	}
-	return result
+
+	for i := 0; i < n; i += 2 {
+		expr.Values[i/2] = string(input[items[i]:items[i+1]])
+	}
+
+	return expr
 }

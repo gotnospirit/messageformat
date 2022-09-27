@@ -5,13 +5,13 @@ import (
 	"errors"
 )
 
-type selectExpr struct {
+type SelectExpr struct {
 	Key     string                `json:"key"`
 	Choices map[string]*ParseTree `json:"choices"`
 }
 
 func (p *parser) parseSelect(varname string, char rune, start, end int, ptr_input *[]rune) (Expression, int, error) {
-	result := new(selectExpr)
+	result := new(SelectExpr)
 	result.Key = varname
 	result.Choices = make(map[string]*ParseTree)
 
@@ -64,7 +64,7 @@ func (p *parser) parseSelect(varname string, char rune, start, end int, ptr_inpu
 // It will returns an error if :
 // - the associated value can't be convert to string (i.e. struct {}, ...)
 func (f *formatter) formatSelect(expr Expression, ptr_output *bytes.Buffer, data map[string]any) error {
-	o := expr.(*selectExpr)
+	o := expr.(*SelectExpr)
 
 	value, err := toString(data, o.Key)
 	if nil != err {
