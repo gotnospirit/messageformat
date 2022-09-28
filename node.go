@@ -16,6 +16,10 @@ func (x *ParseTree) add(ctype string, child Expression) {
 }
 
 func (x *ParseTree) ForEach(fn func(n *Node) error) error {
+	if x.Children == nil {
+		return nil
+	}
+
 	var err error
 	for _, child := range x.Children {
 		err = fn(child)

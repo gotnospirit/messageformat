@@ -16,7 +16,10 @@ import (
 // - its key can't be found in the given map
 // - the computed named key (MessageFormat.getNamedKey) is not a key of the given map
 func (f *formatter) formatOrdinal(expr Expression, ptr_output *bytes.Buffer, data map[string]any) error {
-	o := expr.(*SelectExpr)
+	o, ok := expr.(*SelectExpr)
+	if !ok {
+		return fmt.Errorf("InvalidExprType: want SelectExpr, got %T", expr)
+	}
 
 	value, err := toString(data, o.Key)
 	if err != nil {
@@ -28,7 +31,7 @@ func (f *formatter) formatOrdinal(expr Expression, ptr_output *bytes.Buffer, dat
 	if v, ok := data[o.Key]; ok {
 		switch val := v.(type) {
 		default:
-			return fmt.Errorf("ordinal: Unsupported type for named key: %T", val)
+			return fmt.Errorf("UnsupportedOrdinalKeyType: %T", val)
 
 		case int, float64:
 

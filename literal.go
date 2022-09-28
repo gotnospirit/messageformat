@@ -13,7 +13,7 @@ type LiteralExpr struct {
 func (f *formatter) formatLiteral(expr Expression, ptr_output *bytes.Buffer, pound string) error {
 	literal, ok := expr.(LiteralExpr)
 	if !ok {
-		return fmt.Errorf("the Expression type must be LiteralExpr, got: %T", expr)
+		return fmt.Errorf("InvalidExprType: want LiteralExpr, got: %T", expr)
 	}
 
 	for _, val := range literal.Values {

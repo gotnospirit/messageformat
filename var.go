@@ -13,7 +13,7 @@ type VarExpr struct {
 func (f *formatter) formatVar(expr Expression, ptr_output *bytes.Buffer, data map[string]interface{}) error {
 	v, ok := expr.(VarExpr)
 	if !ok {
-		return fmt.Errorf("expected Expression of type VarExpr but got %T", v)
+		return fmt.Errorf("InvalidExprType: want VarExpr, got %T", v)
 	}
 
 	value, err := toString(data, v.Name)

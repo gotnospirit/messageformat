@@ -94,7 +94,7 @@ func (p *parser) parsePlural(varname string, char rune, start, end int, ptr_inpu
 func (f *formatter) formatPlural(expr Expression, ptr_output *bytes.Buffer, data map[string]any) error {
 	o, ok := expr.(*PluralExpr)
 	if !ok {
-		return fmt.Errorf("expression is not a plural")
+		return fmt.Errorf("InvalidExprType: want PluralExpr, got %T", expr)
 	}
 
 	key := o.Select.Key
@@ -119,7 +119,7 @@ func (f *formatter) formatPlural(expr Expression, ptr_output *bytes.Buffer, data
 			key = "=" + val
 
 		default:
-			return fmt.Errorf("unsupported type for named plural key: %T", v)
+			return fmt.Errorf("UnsupportedPluralKeyType: %T", v)
 
 		}
 
