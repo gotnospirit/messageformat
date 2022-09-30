@@ -24,7 +24,7 @@ func parseSelect(varname string, ptr_compiler *Parser, char rune, start, end int
 	pos := start + 1
 
 	for pos < end {
-		key, char, i, err := readKey(char, pos, end, ptr_input)
+		key, char, i, err := readKey(pos, end, ptr_input)
 
 		if nil != err {
 			return nil, i, err
@@ -78,7 +78,7 @@ func formatSelect(expr Expression, ptr_output *bytes.Buffer, data *map[string]in
 	return choice.format(ptr_output, data, ptr_mf, value)
 }
 
-func readKey(char rune, start, end int, ptr_input *[]rune) (string, rune, int, error) {
+func readKey(start, end int, ptr_input *[]rune) (string, rune, int, error) {
 	char, pos := whitespace(start, end, ptr_input)
 	fc_pos, lc_pos := pos, pos
 
