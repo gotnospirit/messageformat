@@ -9,7 +9,7 @@ import (
 func toStringResult(t *testing.T, data map[string]interface{}, key, expected string) {
 	result, err := toString(data, key)
 
-	if nil != err {
+	if err != nil {
 		t.Errorf("Expecting `%s` but got an error `%s`", expected, err.Error())
 	} else if expected != result {
 		t.Errorf("Expecting `%s` but got `%s`", expected, result)
@@ -21,7 +21,7 @@ func toStringResult(t *testing.T, data map[string]interface{}, key, expected str
 func toStringError(t *testing.T, data map[string]interface{}, key string) {
 	result, err := toString(data, "B")
 
-	if nil == err {
+	if err == nil {
 		t.Errorf("Expecting an error but got `%s`", result)
 	} else if testing.Verbose() {
 		fmt.Printf("Successfully returns an error `%s`\n", err.Error())

@@ -7,7 +7,7 @@ import (
 
 func formatVar(expr Expression, ptr_output *bytes.Buffer, data *map[string]interface{}, _ *MessageFormat, _ string) error {
 	value, err := toString(*data, expr.(string))
-	if nil != err {
+	if err != nil {
 		return err
 	}
 	ptr_output.WriteString(value)
@@ -23,7 +23,7 @@ func readVar(start, end int, ptr_input *[]rune) (string, rune, int, error) {
 		switch char {
 		default:
 			// [_0-9a-zA-Z]+
-			if '_' != char && (char < '0' || char > '9') && (char < 'A' || char > 'Z') && (char < 'a' || char > 'z') {
+			if char != '_' && (char < '0' || char > '9') && (char < 'A' || char > 'Z') && (char < 'a' || char > 'z') {
 				return "", char, pos, errors.New("InvalidFormat")
 			} else if pos != lc_pos { // non continu (inner whitespace)
 				return "", char, pos, errors.New("InvalidFormat")

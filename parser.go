@@ -36,9 +36,9 @@ func (x *Parser) Parse(input string) (*MessageFormat, error) {
 	root := node{}
 	for pos < end {
 		i, level, err := x.parse(pos, end, &runes, &root)
-		if nil != err {
+		if err != nil {
 			return nil, parseError{err.Error(), i}
-		} else if 0 != level {
+		} else if level != 0 {
 			return nil, parseError{"UnbalancedBraces", i}
 		}
 
@@ -58,32 +58,32 @@ func (x *Parser) Register(key string, p parseFunc, f formatFunc) error {
 
 func (x *Parser) parseExpression(start, end int, ptr_input *[]rune) (string, Expression, int, error) {
 	varname, char, pos, err := readVar(start, end, ptr_input)
-	if nil != err {
+	if err != nil {
 		return "", nil, pos, err
-	} else if "" == varname {
+	} else if varname == "" {
 		return "", nil, pos, fmt.Errorf("MissingVarName")
-	} else if CloseChar == char {
+	} else if char == CloseChar {
 		return "var", varname, pos, nil
 	}
 
 	ctype, char, pos, err := readVar(pos+1, end, ptr_input)
-	if nil != err {
+	if err != nil {
 		return "", nil, pos, err
 	}
 
 	fn, ok := x.parsers[ctype]
 	if !ok {
 		return "", nil, pos, fmt.Errorf("UnknownType: `%s`", ctype)
-	} else if nil == fn {
+	} else if fn == nil {
 		return "", nil, pos, fmt.Errorf("UndefinedParseFunc: `%s`", ctype)
 	}
 
 	expr, pos, err := fn(varname, x, char, pos, end, ptr_input)
-	if nil != err {
+	if err != nil {
 		return "", nil, pos, err
 	}
 
-	if pos >= end || CloseChar != (*ptr_input)[pos] {
+	if pos >= end || (*ptr_input)[pos] != CloseChar {
 		return "", nil, pos, fmt.Errorf("UnbalancedBraces")
 	}
 	return ctype, expr, pos, nil
@@ -125,7 +125,7 @@ loop:
 				}
 
 				ctype, child, i, err := x.parseExpression(pos+1, end, ptr_input)
-				if nil != err {
+				if err != nil {
 					return i, level, err
 				}
 
@@ -150,7 +150,7 @@ loop:
 
 func NewWithCulture(name string) (*Parser, error) {
 	fn, err := plural.GetFunc(name)
-	if nil != err {
+	if err != nil {
 		return nil, err
 	}
 

@@ -24,12 +24,12 @@ func (x *node) format(ptr_output *bytes.Buffer, data *map[string]interface{}, pt
 		ctype := child.ctype
 
 		fn, err := ptr_mf.getFormatter(ctype)
-		if nil != err {
+		if err != nil {
 			return err
 		}
 
 		err = fn(child.expr, ptr_output, data, ptr_mf, pound)
-		if nil != err {
+		if err != nil {
 			return err
 		}
 	}

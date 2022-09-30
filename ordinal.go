@@ -19,7 +19,7 @@ func formatOrdinal(expr Expression, ptr_output *bytes.Buffer, data *map[string]i
 	o := expr.(*selectExpr)
 
 	value, err := toString(*data, o.key)
-	if nil != err {
+	if err != nil {
 		return err
 	}
 
@@ -34,19 +34,19 @@ func formatOrdinal(expr Expression, ptr_output *bytes.Buffer, data *map[string]i
 
 		case string:
 			_, err := strconv.ParseFloat(v.(string), 64)
-			if nil != err {
+			if err != nil {
 				return err
 			}
 		}
 
 		key, err := ptr_mf.getNamedKey(v, true)
-		if nil != err {
+		if err != nil {
 			return err
 		}
 		choice = o.choices[key]
 	}
 
-	if nil == choice {
+	if choice == nil {
 		choice = o.choices["other"]
 	}
 	return choice.format(ptr_output, data, ptr_mf, value)

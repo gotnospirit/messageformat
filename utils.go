@@ -8,7 +8,7 @@ import (
 
 // isWhitespace returns true if the rune is a whitespace.
 func isWhitespace(char rune) bool {
-	return ' ' == char || '\r' == char || '\n' == char || '\t' == char
+	return char == ' ' || char == '\r' || char == '\n' || char == '\t'
 }
 
 // whitespace traverses the input until a non-whitespace char is encountered.

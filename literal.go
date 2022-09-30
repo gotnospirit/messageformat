@@ -8,9 +8,9 @@ func formatLiteral(expr Expression, ptr_output *bytes.Buffer, _ *map[string]inte
 	content := expr.([]string)
 
 	for _, c := range content {
-		if "" != c {
+		if c != "" {
 			ptr_output.WriteString(c)
-		} else if "" != pound {
+		} else if pound != "" {
 			ptr_output.WriteString(pound)
 		} else {
 			ptr_output.WriteRune(PoundChar)
@@ -30,7 +30,7 @@ func parseLiteral(start, end int, ptr_input *[]rune) []string {
 	for i := start; i < end; i++ {
 		c := input[i]
 
-		if EscapeChar == c {
+		if c == EscapeChar {
 			gap++
 			e++
 			escaped = true
