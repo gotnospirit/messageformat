@@ -36,7 +36,7 @@ func whitespace(start, end int, ptr_input *[]rune) (rune, int) {
 // It will returns an error if the value's type is not <nil/string/bool/numeric/time.Duration/fmt.Stringer>.
 func toString(data map[string]interface{}, key string) (string, error) {
 	if v, ok := data[key]; ok {
-		switch v.(type) {
+		switch t := v.(type) {
 		default:
 			return "", fmt.Errorf("toString: Unsupported type: %T", v)
 
@@ -44,61 +44,61 @@ func toString(data map[string]interface{}, key string) (string, error) {
 			return "", nil
 
 		case bool:
-			return strconv.FormatBool(v.(bool)), nil
+			return strconv.FormatBool(t), nil
 
 		case string:
-			return v.(string), nil
+			return t, nil
 
 		case int:
-			return fmt.Sprintf("%d", v.(int)), nil
+			return fmt.Sprintf("%d", t), nil
 
 		case int8:
-			return strconv.FormatInt(int64(v.(int8)), 10), nil
+			return strconv.FormatInt(int64(t), 10), nil
 
 		case int16:
-			return strconv.FormatInt(int64(v.(int16)), 10), nil
+			return strconv.FormatInt(int64(t), 10), nil
 
 		case int32:
-			return strconv.FormatInt(int64(v.(int32)), 10), nil
+			return strconv.FormatInt(int64(t), 10), nil
 
 		case int64:
-			return strconv.FormatInt(v.(int64), 10), nil
+			return strconv.FormatInt(t, 10), nil
 
 		case uint:
-			return strconv.FormatUint(uint64(v.(uint)), 10), nil
+			return strconv.FormatUint(uint64(t), 10), nil
 
 		case uint8:
-			return strconv.FormatUint(uint64(v.(uint8)), 10), nil
+			return strconv.FormatUint(uint64(t), 10), nil
 
 		case uint16:
-			return strconv.FormatUint(uint64(v.(uint16)), 10), nil
+			return strconv.FormatUint(uint64(t), 10), nil
 
 		case uint32:
-			return strconv.FormatUint(uint64(v.(uint32)), 10), nil
+			return strconv.FormatUint(uint64(t), 10), nil
 
 		case uint64:
-			return strconv.FormatUint(v.(uint64), 10), nil
+			return strconv.FormatUint(t, 10), nil
 
 		case float32:
-			return strconv.FormatFloat(float64(v.(float32)), 'f', -1, 32), nil
+			return strconv.FormatFloat(float64(t), 'f', -1, 32), nil
 
 		case float64:
-			return strconv.FormatFloat(v.(float64), 'f', -1, 64), nil
+			return strconv.FormatFloat(t, 'f', -1, 64), nil
 
 		case complex64:
-			return fmt.Sprintf("%g", v.(complex64)), nil
+			return fmt.Sprintf("%g", t), nil
 
 		case complex128:
-			return fmt.Sprintf("%g", v.(complex128)), nil
+			return fmt.Sprintf("%g", t), nil
 
 		case uintptr:
-			return fmt.Sprintf("%08x", v.(uintptr)), nil
+			return fmt.Sprintf("%08x", t), nil
 
 		case time.Duration:
-			return v.(time.Duration).String(), nil
+			return t.String(), nil
 
 		case fmt.Stringer:
-			return v.(fmt.Stringer).String(), nil
+			return t.String(), nil
 		}
 	}
 	return "", nil

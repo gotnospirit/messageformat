@@ -26,14 +26,14 @@ func formatOrdinal(expr Expression, ptr_output *bytes.Buffer, data *map[string]i
 	var choice *node
 
 	if v, ok := (*data)[o.key]; ok {
-		switch v.(type) {
+		switch t := v.(type) {
 		default:
 			return fmt.Errorf("Ordinal: Unsupported type for named key: %T", v)
 
 		case int, float64:
 
 		case string:
-			_, err := strconv.ParseFloat(v.(string), 64)
+			_, err := strconv.ParseFloat(t, 64)
 			if err != nil {
 				return err
 			}

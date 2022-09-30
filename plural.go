@@ -101,38 +101,38 @@ func formatPlural(expr Expression, ptr_output *bytes.Buffer, data *map[string]in
 	var choice *node
 
 	if v, ok := (*data)[key]; ok {
-		switch v.(type) {
+		switch t := v.(type) {
 		default:
 			return fmt.Errorf("Plural: Unsupported type for named key: %T", v)
 
 		case int:
-			key = fmt.Sprintf("=%d", v.(int))
+			key = fmt.Sprintf("=%d", t)
 
 		case float64:
-			key = "=" + strconv.FormatFloat(v.(float64), 'f', -1, 64)
+			key = "=" + strconv.FormatFloat(t, 'f', -1, 64)
 
 		case string:
-			key = "=" + v.(string)
+			key = "=" + t
 		}
 
 		if choice = o.choices[key]; nil == choice {
-			switch v.(type) {
+			switch t := v.(type) {
 			case int:
 				if offset != 0 {
-					offset_value := v.(int) - offset
+					offset_value := t - offset
 					value = fmt.Sprintf("%d", offset_value)
 					key, err = ptr_mf.getNamedKey(offset_value, false)
 				} else {
-					key, err = ptr_mf.getNamedKey(v.(int), false)
+					key, err = ptr_mf.getNamedKey(t, false)
 				}
 
 			case float64:
 				if offset != 0 {
-					offset_value := v.(float64) - float64(offset)
+					offset_value := t - float64(offset)
 					value = strconv.FormatFloat(offset_value, 'f', -1, 64)
 					key, err = ptr_mf.getNamedKey(offset_value, false)
 				} else {
-					key, err = ptr_mf.getNamedKey(v.(float64), false)
+					key, err = ptr_mf.getNamedKey(t, false)
 				}
 
 			case string:
