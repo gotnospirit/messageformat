@@ -15,7 +15,7 @@ func parseSelect(varname string, ptr_compiler *Parser, char rune, start, end int
 	result.key = varname
 	result.choices = make(map[string]*node)
 
-	if PartChar != char {
+	if char != PartChar {
 		return nil, start, errors.New("MalformedOption")
 	}
 
@@ -26,25 +26,25 @@ func parseSelect(varname string, ptr_compiler *Parser, char rune, start, end int
 	for pos < end {
 		key, char, i, err := readKey(char, pos, end, ptr_input)
 
-		if nil != err {
+		if err != nil {
 			return nil, i, err
-		} else if ':' == char {
+		} else if char == ':' {
 			return nil, i, errors.New("UnexpectedExtension")
 		}
 
-		if "other" == key {
+		if key == "other" {
 			hasOtherChoice = true
 		}
 
 		choice, char, i, err := readChoice(ptr_compiler, char, i, end, ptr_input)
-		if nil != err {
+		if err != nil {
 			return nil, i, err
 		}
 
 		result.choices[key] = choice
 		pos = i
 
-		if CloseChar == char {
+		if char == CloseChar {
 			break
 		}
 	}
@@ -67,7 +67,7 @@ func formatSelect(expr Expression, ptr_output *bytes.Buffer, data *map[string]in
 	o := expr.(*selectExpr)
 
 	value, err := toString(*data, o.key)
-	if nil != err {
+	if err != nil {
 		return err
 	}
 
@@ -110,14 +110,14 @@ func readKey(char rune, start, end int, ptr_input *[]rune) (string, rune, int, e
 }
 
 func readChoice(ptr_compiler *Parser, char rune, pos, end int, ptr_input *[]rune) (*node, rune, int, error) {
-	if OpenChar != char {
+	if char != OpenChar {
 		return nil, char, pos, errors.New("MissingChoiceContent")
 	}
 
 	choice := new(node)
 
 	pos, _, err := ptr_compiler.parse(pos+1, end, ptr_input, choice)
-	if nil != err {
+	if err != nil {
 		return nil, char, pos, err
 	}
 

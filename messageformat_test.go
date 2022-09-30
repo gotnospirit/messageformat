@@ -23,11 +23,11 @@ import (
 
 func doParse(input string) (*MessageFormat, error) {
 	o, err := New()
-	if nil != err {
+	if err != nil {
 		return nil, err
 	}
 	mf, err := o.Parse(input)
-	if nil != err {
+	if err != nil {
 		return nil, err
 	}
 	return mf, nil
@@ -35,7 +35,7 @@ func doParse(input string) (*MessageFormat, error) {
 
 func TestSetPluralFunction(t *testing.T) {
 	mf, err := doParse(`{N,plural,one{1}other{2}}`)
-	if nil != err {
+	if err != nil {
 		t.Errorf("Unexpected parse failure: `%s`", err.Error())
 	} else {
 		// checks we can't unset the default plural function
@@ -44,9 +44,9 @@ func TestSetPluralFunction(t *testing.T) {
 
 		data := map[string]interface{}{"N": 1}
 		result, err := mf.FormatMap(data)
-		if nil != err {
+		if err != nil {
 			t.Errorf("Unexpected error : `%s`", err.Error())
-		} else if "1" != result {
+		} else if result != "1" {
 			t.Errorf("Unexpected format result : `%s`", result)
 		} else {
 			// checks we can set a new plural function and get a different result
@@ -54,14 +54,14 @@ func TestSetPluralFunction(t *testing.T) {
 				return "other"
 			})
 
-			if nil != err {
+			if err != nil {
 				t.Errorf("Unexpected error <%s>", err)
 			} else {
 				result, err := mf.FormatMap(data)
 
-				if nil != err {
+				if err != nil {
 					t.Errorf("Unexpected error : `%s`", err.Error())
-				} else if "2" != result {
+				} else if result != "2" {
 					t.Errorf("Unexpected format result : `%s`", result)
 				} else if testing.Verbose() {
 					fmt.Printf("- Got expected value <%s>\n", result)

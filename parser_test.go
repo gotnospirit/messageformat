@@ -23,12 +23,12 @@ func doTest(t *testing.T, data Test) {
 	} else {
 		mf, err := o.Parse(data.input)
 
-		if nil != err {
+		if err != nil {
 			t.Errorf("`%s` threw <%s>", data.input, err)
 		} else {
 			for _, ex := range data.expects {
 				result, err := mf.FormatMap(ex.data)
-				if nil != err {
+				if err != nil {
 					t.Errorf("`%s` threw <%s>", data.input, err)
 				} else if result != ex.output {
 					t.Errorf("Expecting <%v> but got <%v>", ex.output, result)
@@ -46,7 +46,7 @@ func doTestException(t *testing.T, input string, data map[string]interface{}, ex
 	} else {
 		mf, err := o.Parse(input)
 
-		if nil != err {
+		if err != nil {
 			doTestCompileError(t, input, expected, err)
 		} else {
 			_, err := mf.FormatMap(data)
@@ -65,7 +65,7 @@ func doTestParseException(t *testing.T, input, expected string) {
 }
 
 func doTestCompileError(t *testing.T, input, expected string, err error) {
-	if nil == err {
+	if err == nil {
 		t.Errorf("`%s` should threw <%s> but got none", input, expected)
 	} else if err.Error() != expected {
 		t.Errorf("`%s` should threw <%s> but got <%s>", input, expected, err.Error())
@@ -75,7 +75,7 @@ func doTestCompileError(t *testing.T, input, expected string, err error) {
 }
 
 func doTestError(t *testing.T, expected string, err error) {
-	if nil == err {
+	if err == nil {
 		t.Errorf("Expecting exception <%s> but got none", expected)
 	} else if err.Error() != expected {
 		t.Errorf("Expecting exception <%s> but got <%s>", expected, err.Error())
@@ -341,7 +341,7 @@ func TestMultiline(t *testing.T) {
 
 func TestRegister(t *testing.T) {
 	o, err := New()
-	if nil != err {
+	if err != nil {
 		t.Errorf("Unexpected parse failure: `%s`", err.Error())
 	} else {
 		// checks default types can't be overloaded
@@ -356,7 +356,7 @@ func TestRegister(t *testing.T) {
 
 		// nil parseFunc and/or formatFunc are accepted (even if parsing will leads to an error!)
 		err = o.Register("noparse", nil, nil)
-		if nil != err {
+		if err != nil {
 			t.Errorf("Unexpected error: %s", err.Error())
 		}
 

@@ -17,7 +17,7 @@ type MessageFormat struct {
 
 func (x *MessageFormat) SetCulture(name string) error {
 	fn, err := plural.GetFunc(name)
-	if nil != err {
+	if err != nil {
 		return err
 	}
 	x.plural = fn
@@ -25,7 +25,7 @@ func (x *MessageFormat) SetCulture(name string) error {
 }
 
 func (x *MessageFormat) SetPluralFunction(fn pluralFunc) error {
-	if nil == fn {
+	if fn == nil {
 		return fmt.Errorf("PluralFunctionRequired")
 	}
 	x.plural = fn
@@ -40,14 +40,14 @@ func (x *MessageFormat) FormatMap(data map[string]interface{}) (string, error) {
 	var buf bytes.Buffer
 
 	err := x.root.format(&buf, &data, x, "")
-	if nil != err {
+	if err != nil {
 		return "", err
 	}
 	return buf.String(), nil
 }
 
 func (x *MessageFormat) getNamedKey(value interface{}, ordinal bool) (string, error) {
-	if nil == x.plural {
+	if x.plural == nil {
 		return "", fmt.Errorf("UndefinedPluralFunc")
 	}
 	return x.plural(value, ordinal), nil
@@ -57,7 +57,7 @@ func (x *MessageFormat) getFormatter(key string) (formatFunc, error) {
 	fn, ok := x.formatters[key]
 	if !ok {
 		return nil, fmt.Errorf("UnknownType: `%s`", key)
-	} else if nil == fn {
+	} else if fn == nil {
 		return nil, fmt.Errorf("UndefinedFormatFunc: `%s`", key)
 	}
 	return fn, nil
