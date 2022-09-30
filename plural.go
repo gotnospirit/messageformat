@@ -49,7 +49,9 @@ func parsePlural(varname string, ptr_compiler *Parser, char rune, start, end int
 
 			k, c, j, err := readKey(c, j, end, ptr_input)
 
-			if k == "" {
+			if err != nil {
+				return nil, j, err
+			} else if k == "" {
 				return nil, j, fmt.Errorf("MissingChoiceName")
 			}
 
