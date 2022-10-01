@@ -18,7 +18,7 @@ type Expectation struct {
 }
 
 func doTest(t *testing.T, data Test) {
-	if o, err := New(); nil != err {
+	if o, err := New(); err != nil {
 		t.Errorf("`%s` threw <%s>", data.input, err)
 	} else {
 		mf, err := o.Parse(data.input)
@@ -41,7 +41,7 @@ func doTest(t *testing.T, data Test) {
 }
 
 func doTestException(t *testing.T, input string, data map[string]interface{}, expected string) {
-	if o, err := New(); nil != err {
+	if o, err := New(); err != nil {
 		t.Errorf("`%s` threw <%s>", input, err)
 	} else {
 		mf, err := o.Parse(input)
@@ -56,7 +56,7 @@ func doTestException(t *testing.T, input string, data map[string]interface{}, ex
 }
 
 func doTestParseException(t *testing.T, input, expected string) {
-	if o, err := New(); nil != err {
+	if o, err := New(); err != nil {
 		t.Errorf("`%s` threw <%s>", input, err)
 	} else {
 		_, err := o.Parse(input)

@@ -117,7 +117,7 @@ func formatPlural(expr Expression, ptr_output *bytes.Buffer, data *map[string]in
 			key = "=" + t
 		}
 
-		if choice = o.choices[key]; nil == choice {
+		if choice = o.choices[key]; choice == nil {
 			switch t := v.(type) {
 			case int:
 				if offset != 0 {
