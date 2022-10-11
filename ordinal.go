@@ -15,39 +15,43 @@ import (
 // It will falls back to the "other" choice if :
 // - its key can't be found in the given map
 // - the computed named key (MessageFormat.getNamedKey) is not a key of the given map
-func formatOrdinal(expr Expression, ptr_output *bytes.Buffer, data *map[string]interface{}, ptr_mf *MessageFormat, _ string) error {
-	o := expr.(*selectExpr)
+func (f *formatter) formatOrdinal(expr Expression, ptr_output *bytes.Buffer, data map[string]any) error {
+	o, ok := expr.(*SelectExpr)
+	if !ok {
+		return fmt.Errorf("InvalidExprType: want SelectExpr, got %T", expr)
+	}
 
-	value, err := toString(*data, o.key)
+	value, err := toString(data, o.Key)
 	if err != nil {
 		return err
 	}
 
-	var choice *node
+	var choice *ParseTree
 
-	if v, ok := (*data)[o.key]; ok {
-		switch t := v.(type) {
+	if v, ok := data[o.Key]; ok {
+		switch val := v.(type) {
 		default:
-			return fmt.Errorf("Ordinal: Unsupported type for named key: %T", v)
+			return fmt.Errorf("UnsupportedOrdinalKeyType: %T", val)
 
 		case int, float64:
 
 		case string:
-			_, err := strconv.ParseFloat(t, 64)
+			_, err := strconv.ParseFloat(val, 64)
 			if err != nil {
 				return err
 			}
 		}
 
-		key, err := ptr_mf.getNamedKey(v, true)
+		key, err := f.getNamedKey(v, true)
 		if err != nil {
 			return err
 		}
-		choice = o.choices[key]
+		choice = o.Choices[key]
 	}
 
 	if choice == nil {
-		choice = o.choices["other"]
+		choice = o.Choices["other"]
 	}
-	return choice.format(ptr_output, data, ptr_mf, value)
+
+	return f.format(choice, ptr_output, data, value)
 }

@@ -3,17 +3,18 @@ package messageformat
 import (
 	"bytes"
 	"errors"
+	"fmt"
 )
 
-type selectExpr struct {
-	key     string
-	choices map[string]*node
+type SelectExpr struct {
+	Key     string                `json:"key"`
+	Choices map[string]*ParseTree `json:"choices"`
 }
 
-func parseSelect(varname string, ptr_compiler *Parser, char rune, start, end int, ptr_input *[]rune) (Expression, int, error) {
-	result := new(selectExpr)
-	result.key = varname
-	result.choices = make(map[string]*node)
+func (p *parser) parseSelect(varname string, char rune, start, end int, ptr_input *[]rune) (Expression, int, error) {
+	result := new(SelectExpr)
+	result.Key = varname
+	result.Choices = make(map[string]*ParseTree)
 
 	if char != PartChar {
 		return nil, start, errors.New("MalformedOption")
@@ -28,7 +29,7 @@ func parseSelect(varname string, ptr_compiler *Parser, char rune, start, end int
 
 		if err != nil {
 			return nil, i, err
-		} else if char == ':' {
+		} else if char == ColonChar {
 			return nil, i, errors.New("UnexpectedExtension")
 		}
 
@@ -36,12 +37,12 @@ func parseSelect(varname string, ptr_compiler *Parser, char rune, start, end int
 			hasOtherChoice = true
 		}
 
-		choice, char, i, err := readChoice(ptr_compiler, char, i, end, ptr_input)
+		choice, char, i, err := p.readChoice(char, i, end, ptr_input)
 		if err != nil {
 			return nil, i, err
 		}
 
-		result.choices[key] = choice
+		result.Choices[key] = choice
 		pos = i
 
 		if char == CloseChar {
@@ -63,19 +64,23 @@ func parseSelect(varname string, ptr_compiler *Parser, char rune, start, end int
 //
 // It will returns an error if :
 // - the associated value can't be convert to string (i.e. struct {}, ...)
-func formatSelect(expr Expression, ptr_output *bytes.Buffer, data *map[string]interface{}, ptr_mf *MessageFormat, _ string) error {
-	o := expr.(*selectExpr)
+func (f *formatter) formatSelect(expr Expression, ptr_output *bytes.Buffer, data map[string]any) error {
+	o, ok := expr.(*SelectExpr)
+	if !ok {
+		return fmt.Errorf("InvalidExprType: want SelectExpr, got %T", expr)
+	}
 
-	value, err := toString(*data, o.key)
+	value, err := toString(data, o.Key)
 	if err != nil {
 		return err
 	}
 
-	choice, ok := o.choices[value]
+	choice, ok := o.Choices[value]
 	if !ok {
-		choice = o.choices["other"]
+		choice = o.Choices["other"]
 	}
-	return choice.format(ptr_output, data, ptr_mf, value)
+
+	return f.format(choice, ptr_output, data, value)
 }
 
 func readKey(start, end int, ptr_input *[]rune) (string, rune, int, error) {
@@ -109,14 +114,14 @@ func readKey(start, end int, ptr_input *[]rune) (string, rune, int, error) {
 	return "", char, pos, errors.New("UnbalancedBraces")
 }
 
-func readChoice(ptr_compiler *Parser, char rune, pos, end int, ptr_input *[]rune) (*node, rune, int, error) {
-	if char != OpenChar {
+func (p *parser) readChoice(char rune, pos, end int, ptr_input *[]rune) (*ParseTree, rune, int, error) {
+	if OpenChar != char {
 		return nil, char, pos, errors.New("MissingChoiceContent")
 	}
 
-	choice := new(node)
+	choice := new(ParseTree)
 
-	pos, _, err := ptr_compiler.parse(pos+1, end, ptr_input, choice)
+	pos, _, err := p.parse(pos+1, end, ptr_input, choice)
 	if err != nil {
 		return nil, char, pos, err
 	}

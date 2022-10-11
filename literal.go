@@ -2,24 +2,34 @@ package messageformat
 
 import (
 	"bytes"
+	"fmt"
 )
 
-func formatLiteral(expr Expression, ptr_output *bytes.Buffer, _ *map[string]interface{}, _ *MessageFormat, pound string) error {
-	content := expr.([]string)
+// LiteralExpr represents a string literal
+type LiteralExpr struct {
+	Values []string
+}
 
-	for _, c := range content {
-		if c != "" {
-			ptr_output.WriteString(c)
+func (f *formatter) formatLiteral(expr Expression, ptr_output *bytes.Buffer, pound string) error {
+	literal, ok := expr.(LiteralExpr)
+	if !ok {
+		return fmt.Errorf("InvalidExprType: want LiteralExpr, got: %T", expr)
+	}
+
+	for _, val := range literal.Values {
+		if val != "" {
+			ptr_output.WriteString(val)
 		} else if pound != "" {
 			ptr_output.WriteString(pound)
 		} else {
 			ptr_output.WriteRune(PoundChar)
 		}
 	}
+
 	return nil
 }
 
-func parseLiteral(start, end int, ptr_input *[]rune) []string {
+func (p *parser) parseLiteral(start, end int, ptr_input *[]rune) LiteralExpr {
 	var items []int
 
 	input := *ptr_input
@@ -30,7 +40,7 @@ func parseLiteral(start, end int, ptr_input *[]rune) []string {
 	for i := start; i < end; i++ {
 		c := input[i]
 
-		if c == EscapeChar {
+		if EscapeChar == c {
 			gap++
 			e++
 			escaped = true
@@ -72,9 +82,13 @@ func parseLiteral(start, end int, ptr_input *[]rune) []string {
 	}
 
 	n := len(items)
-	result := make([]string, n/2)
-	for i := 0; i < n; i += 2 {
-		result[i/2] = string(input[items[i]:items[i+1]])
+	expr := LiteralExpr{
+		Values: make([]string, n/2),
 	}
-	return result
+
+	for i := 0; i < n; i += 2 {
+		expr.Values[i/2] = string(input[items[i]:items[i+1]])
+	}
+
+	return expr
 }

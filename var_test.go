@@ -53,7 +53,7 @@ func TestVar(t *testing.T) {
 		},
 	})
 
-	doTestException(
+	doTestFormatException(
 		t,
 		"{VAR}",
 		map[string]interface{}{"VAR": struct{}{}},

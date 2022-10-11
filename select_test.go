@@ -62,7 +62,7 @@ func TestSelect(t *testing.T) {
 		},
 	})
 
-	doTestException(
+	doTestFormatException(
 		t,
 		"{VAR,select,other{succeed}}",
 		map[string]interface{}{"VAR": struct{}{}},

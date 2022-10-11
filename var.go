@@ -3,14 +3,26 @@ package messageformat
 import (
 	"bytes"
 	"errors"
+	"fmt"
 )
 
-func formatVar(expr Expression, ptr_output *bytes.Buffer, data *map[string]interface{}, _ *MessageFormat, _ string) error {
-	value, err := toString(*data, expr.(string))
+type VarExpr struct {
+	Name string
+}
+
+func (f *formatter) formatVar(expr Expression, ptr_output *bytes.Buffer, data map[string]interface{}) error {
+	v, ok := expr.(VarExpr)
+	if !ok {
+		return fmt.Errorf("InvalidExprType: want VarExpr, got %T", v)
+	}
+
+	value, err := toString(data, v.Name)
 	if err != nil {
 		return err
 	}
+
 	ptr_output.WriteString(value)
+
 	return nil
 }
 

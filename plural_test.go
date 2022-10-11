@@ -31,7 +31,7 @@ func TestPlural(t *testing.T) {
 		},
 	})
 
-	doTestException(
+	doTestFormatException(
 		t,
 		"{NUM,plural,other{b}}",
 		map[string]interface{}{"NUM": struct{}{}},
