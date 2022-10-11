@@ -1,4 +1,4 @@
-module github.com/gotnospirit/messageformat
+module github.com/cowpaths/messageformat
 
 go 1.18
 
