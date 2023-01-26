@@ -13,6 +13,15 @@ const (
 	ColonChar  = ':'
 )
 
+type ExpressionType = string
+
+const (
+	DateExpression    ExpressionType = "date"
+	PluralExpression  ExpressionType = "plural"
+	SelectExpression  ExpressionType = "select"
+	OrdinalExpression ExpressionType = "selectordinal"
+)
+
 type Parser interface {
 	Parse(string) (*ParseTree, error)
 }
@@ -25,66 +34,68 @@ func NewParser() Parser {
 
 func (x *parser) Parse(input string) (*ParseTree, error) {
 	runes := []rune(input)
-	pos, end := 0, len(runes)
+	cursor, end := 0, len(runes)
 
 	root := ParseTree{}
-	for pos < end {
-		i, level, err := x.parse(pos, end, &runes, &root)
-		if err != nil {
+	for cursor < end {
+		i, level, err := x.parse(cursor, end, &runes, &root)
+		if nil != err {
 			return nil, parseError{err.Error(), i}
 		} else if level != 0 {
 			return nil, parseError{"UnbalancedBraces", i}
 		}
 
-		pos = i
+		cursor = i
 	}
 
 	return &root, nil
 }
 
-func (x *parser) parseExpression(start, end int, ptr_input *[]rune) (string, Expression, int, error) {
-	var pos int
+func (p *parser) parseExpression(start, end int, ptr_input *[]rune) (string, Expression, int, error) {
+	var cursor int
 	var expr Expression
 
-	varname, char, pos, err := readVar(start, end, ptr_input)
+	// This is the start of an expression like { var, expr, params}
+	varName, nextChar, cursor, err := readVar(start, end, ptr_input)
 	if err != nil {
-		return "", nil, pos, err
+		return "", nil, cursor, err
 	}
 
-	if varname == "" {
-		return "", nil, pos, fmt.Errorf("MissingVarName")
+	if varName == "" {
+		return "", nil, cursor, fmt.Errorf("MissingVarName")
 	}
 
-	if char == CloseChar {
-		return "var", VarExpr{
-			Name: varname,
-		}, pos, nil
+	// if its just { var } return a VarExpr
+	if nextChar == CloseChar {
+		return "var", VarExpr{varName}, cursor, nil
 	}
 
-	ctype, char, pos, err := readVar(pos+1, end, ptr_input)
-	if err != nil {
-		return "", nil, pos, err
+	exprType, nextChar, cursor, err := readVar(cursor+1, end, ptr_input)
+	if nil != err {
+		return "", nil, cursor, err
 	}
 
-	switch ctype {
-	case "plural":
-		expr, pos, err = x.parsePlural(varname, char, pos, end, ptr_input)
-	case "select":
+	switch exprType {
+	case DateExpression:
+		expr, cursor, err = p.parseDate(varName, nextChar, cursor, end, ptr_input)
+	case PluralExpression:
+		expr, cursor, err = p.parsePlural(varName, nextChar, cursor, end, ptr_input)
+	case SelectExpression:
 		fallthrough
-	case "selectordinal":
-		expr, pos, err = x.parseSelect(varname, char, pos, end, ptr_input)
+	case OrdinalExpression:
+		expr, cursor, err = p.parseSelect(varName, nextChar, cursor, end, ptr_input)
 	default:
-		return "", nil, pos, fmt.Errorf("UnknownType: `%s`", ctype)
+		return "", nil, cursor, fmt.Errorf("UnknownType: `%s`", exprType)
 	}
 	if err != nil {
-		return "", nil, pos, err
+		return "", nil, cursor, err
 	}
 
-	if pos >= end || CloseChar != (*ptr_input)[pos] {
-		return "", nil, pos, fmt.Errorf("UnbalancedBraces")
+	if cursor >= end || CloseChar != (*ptr_input)[cursor] {
+		return "", nil, cursor, fmt.Errorf("UnbalancedBraces")
 	}
 
-	return ctype, expr, pos, nil
+	return exprType, expr, cursor, nil
 }
 
 func (p *parser) parse(start, end int, ptr_input *[]rune, parent *ParseTree) (int, int, error) {
@@ -123,7 +134,7 @@ loop:
 				}
 
 				ctype, child, i, err := p.parseExpression(pos+1, end, ptr_input)
-				if err != nil {
+				if nil != err {
 					return i, level, err
 				}
 
